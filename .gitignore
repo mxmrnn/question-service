@@ -1,0 +1,11 @@
+# Build artifacts
+/bin/
+
+# Env
+.env
+
+# Logs
+*.log
+
+# IDE folders
+.idea/
