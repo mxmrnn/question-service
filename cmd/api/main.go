@@ -2,13 +2,15 @@ package main
 
 import (
 	"context"
-	"go.uber.org/zap"
 	"os"
 	"os/signal"
 	"syscall"
 
+	"go.uber.org/zap"
+
 	"question-service/internal/app"
 	"question-service/internal/config"
+	"question-service/internal/db"
 	httptransport "question-service/internal/http"
 	"question-service/internal/logger"
 )
@@ -20,9 +22,14 @@ func main() {
 
 	router := httptransport.NewRouter()
 
+	conn, err := db.New(cfg, log)
+	if err != nil {
+		log.Fatal("failed to connect to database", zap.Error(err))
+	}
+
 	application := app.NewApp(log, app.Config{
 		Address: cfg.HTTPPort,
-	}, router)
+	}, router, conn)
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()

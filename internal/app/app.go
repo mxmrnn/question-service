@@ -3,9 +3,11 @@ package app
 import (
 	"context"
 	"errors"
-	"go.uber.org/zap"
 	"net/http"
 	"time"
+
+	"go.uber.org/zap"
+	"gorm.io/gorm"
 
 	"question-service/internal/logger"
 )
@@ -20,10 +22,11 @@ type App struct {
 	Logger     *logger.Logger
 	Router     http.Handler
 	HTTPServer *http.Server
+	DB         *gorm.DB
 }
 
 // NewApp создаёт новый экземпляр App на основе переданных зависимостей и конфигурации.
-func NewApp(logger *logger.Logger, cfg Config, router http.Handler) *App {
+func NewApp(logger *logger.Logger, cfg Config, router http.Handler, db *gorm.DB) *App {
 	if cfg.Address == "" {
 		cfg.Address = ":8080"
 	}
@@ -37,6 +40,7 @@ func NewApp(logger *logger.Logger, cfg Config, router http.Handler) *App {
 		Logger:     logger,
 		Router:     router,
 		HTTPServer: server,
+		DB:         db,
 	}
 }
 
