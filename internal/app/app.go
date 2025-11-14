@@ -3,9 +3,11 @@ package app
 import (
 	"context"
 	"errors"
-	"log"
+	"go.uber.org/zap"
 	"net/http"
 	"time"
+
+	"question-service/internal/logger"
 )
 
 // Config описывает конфигурацию HTTP-приложения.
@@ -15,13 +17,13 @@ type Config struct {
 
 // App представляет собой HTTP-приложение.
 type App struct {
-	Logger     *log.Logger
+	Logger     *logger.Logger
 	Router     http.Handler
 	HTTPServer *http.Server
 }
 
 // NewApp создаёт новый экземпляр App на основе переданных зависимостей и конфигурации.
-func NewApp(logger *log.Logger, cfg Config, router http.Handler) *App {
+func NewApp(logger *logger.Logger, cfg Config, router http.Handler) *App {
 	if cfg.Address == "" {
 		cfg.Address = ":8080"
 	}
@@ -43,9 +45,9 @@ func (a *App) Run(ctx context.Context) error {
 	serverErr := make(chan error, 1)
 
 	go func() {
-		if a.Logger != nil {
-			a.Logger.Printf("starting HTTP server on %s", a.HTTPServer.Addr)
-		}
+		a.Logger.Info("starting HTTP server",
+			zap.String("address", a.HTTPServer.Addr),
+		)
 
 		if err := a.HTTPServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			serverErr <- err
@@ -58,22 +60,15 @@ func (a *App) Run(ctx context.Context) error {
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		if a.Logger != nil {
-			a.Logger.Println("shutting down HTTP server")
-		}
+		a.Logger.Info("shutting down HTTP server")
 
-		if err := a.HTTPServer.Shutdown(shutdownCtx); err != nil {
-			if !errors.Is(err, context.Canceled) {
-				return err
-			}
+		if err := a.HTTPServer.Shutdown(shutdownCtx); err != nil && !errors.Is(err, context.Canceled) {
+			return err
 		}
 
 		return nil
-	case err := <-serverErr:
-		if errors.Is(err, http.ErrServerClosed) {
-			return nil
-		}
 
+	case err := <-serverErr:
 		return err
 	}
 }

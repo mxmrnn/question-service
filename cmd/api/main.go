@@ -2,27 +2,32 @@ package main
 
 import (
 	"context"
-	"log"
+	"go.uber.org/zap"
 	"os"
 	"os/signal"
 	"syscall"
 
-	app "question-service/internal/app"
-	internalhttp "question-service/internal/http"
+	"question-service/internal/app"
+	"question-service/internal/config"
+	httptransport "question-service/internal/http"
+	"question-service/internal/logger"
 )
 
 func main() {
-	logger := log.New(os.Stdout, "", log.LstdFlags)
+	log := logger.New()
+	defer log.Sync()
+	cfg := config.Load()
 
-	router := internalhttp.NewRouter()
+	router := httptransport.NewRouter()
 
-	cfg := app.Config{Address: ":8080"}
-	application := app.NewApp(logger, cfg, router)
+	application := app.NewApp(log, app.Config{
+		Address: cfg.HTTPPort,
+	}, router)
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
 	if err := application.Run(ctx); err != nil {
-		logger.Fatalf("application stopped with error: %v", err)
+		log.Fatal("application stopped with error", zap.Error(err))
 	}
 }
