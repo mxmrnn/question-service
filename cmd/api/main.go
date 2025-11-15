@@ -13,6 +13,8 @@ import (
 	"question-service/internal/db"
 	httptransport "question-service/internal/http"
 	"question-service/internal/logger"
+	"question-service/internal/repository"
+	"question-service/internal/service"
 )
 
 func main() {
@@ -20,12 +22,18 @@ func main() {
 	defer log.Sync()
 	cfg := config.Load()
 
-	router := httptransport.NewRouter()
-
 	conn, err := db.New(cfg, log)
 	if err != nil {
 		log.Fatal("failed to connect to database", zap.Error(err))
 	}
+
+	qRepo := repository.NewQuestionRepository(conn)
+	aRepo := repository.NewAnswerRepository(conn)
+
+	qService := service.NewQuestionService(qRepo)
+	aService := service.NewAnswerService(aRepo, qRepo)
+
+	router := httptransport.NewRouter(qService, aService)
 
 	application := app.NewApp(log, app.Config{
 		Address: cfg.HTTPPort,
