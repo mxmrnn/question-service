@@ -26,7 +26,7 @@ func (s *AnswerService) CreateAnswer(ctx context.Context, questionID int, userID
 	_, err := s.questions.GetByID(ctx, questionID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, ErrAnswerNotFound
+			return nil, ErrQuestionNotFound
 		}
 
 		return nil, err
