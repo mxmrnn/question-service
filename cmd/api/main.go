@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -18,22 +19,30 @@ import (
 )
 
 func main() {
+	if err := run(); err != nil {
+		fmt.Fprintf(os.Stderr, "fatal: %v\n", err)
+		os.Exit(1)
+	}
+}
+
+func run() error {
 	log := logger.New()
 	defer log.Sync()
+
 	cfg := config.Load()
 
 	conn, err := db.New(cfg, log)
 	if err != nil {
-		log.Fatal("failed to connect to database", zap.Error(err))
+		return err
 	}
 
 	qRepo := repository.NewQuestionRepository(conn)
 	aRepo := repository.NewAnswerRepository(conn)
 
-	qService := service.NewQuestionService(qRepo)
-	aService := service.NewAnswerService(aRepo, qRepo)
+	qSvc := service.NewQuestionService(qRepo)
+	aSvc := service.NewAnswerService(aRepo, qRepo)
 
-	router := httptransport.NewRouter(qService, aService)
+	router := httptransport.NewRouter(qSvc, aSvc)
 
 	application := app.NewApp(log, app.Config{
 		Address: cfg.HTTPPort,
@@ -43,6 +52,9 @@ func main() {
 	defer stop()
 
 	if err := application.Run(ctx); err != nil {
-		log.Fatal("application stopped with error", zap.Error(err))
+		log.Error("application stopped with error", zap.Error(err))
+		return err
 	}
+
+	return nil
 }
