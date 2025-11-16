@@ -54,7 +54,7 @@ func (h *AnswerHandler) HandleCreateForQuestion(w http.ResponseWriter, r *http.R
 
 	ans, err := h.svc.CreateAnswer(r.Context(), id, req.UserID, req.Text)
 	if err != nil {
-		if errors.Is(err, service.ErrAnswerNotFound) {
+		if errors.Is(err, service.ErrQuestionNotFound) {
 			transport.WriteError(w, http.StatusNotFound, "question not found")
 			return
 		}
