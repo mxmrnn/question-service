@@ -43,6 +43,7 @@ question-service/
 Приложение можно запустить двумя способами: через Docker Compose или локально.
 
 ### Способ 1: запуск через Docker Compose 
+Выполнить скрипт в директории с файлом docker compose
 ```bash
 docker compose up --build
 ```
@@ -64,7 +65,7 @@ http://localhost:8080
 Проверка состояния:
 
 ```bash
-GET http://localhost:8081/health
+GET http://localhost:8080/health
 ```
 
 ---
