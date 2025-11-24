@@ -31,7 +31,7 @@ func (h *QuestionHandler) HandleQuestions(w http.ResponseWriter, r *http.Request
 	case http.MethodPost:
 		h.createQuestion(w, r)
 	default:
-		w.WriteHeader(http.StatusMethodNotAllowed)
+		transport.WriteError(w, http.StatusMethodNotAllowed, "method not allowed")
 	}
 }
 
@@ -64,7 +64,7 @@ func (h *QuestionHandler) HandleQuestionByID(w http.ResponseWriter, r *http.Requ
 	case http.MethodDelete:
 		h.deleteQuestion(w, r, id)
 	default:
-		w.WriteHeader(http.StatusMethodNotAllowed)
+		transport.WriteError(w, http.StatusMethodNotAllowed, "method not allowed")
 	}
 }
 

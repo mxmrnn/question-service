@@ -14,7 +14,7 @@ func NewRouter(qSvc *service.QuestionService, aSvc *service.AnswerService, log *
 	// healthcheck
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
-			w.WriteHeader(http.StatusMethodNotAllowed)
+			transport.WriteError(w, http.StatusMethodNotAllowed, "method not allowed")
 			return
 		}
 

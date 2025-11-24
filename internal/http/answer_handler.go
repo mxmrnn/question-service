@@ -25,7 +25,7 @@ func NewAnswerHandler(svc *service.AnswerService, log *logger.Logger) *AnswerHan
 // HandleCreateForQuestion обрабатывает POST /questions/{id}/answers
 func (h *AnswerHandler) HandleCreateForQuestion(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		w.WriteHeader(http.StatusMethodNotAllowed)
+		transport.WriteError(w, http.StatusMethodNotAllowed, "method not allowed")
 		return
 	}
 
@@ -116,7 +116,7 @@ func (h *AnswerHandler) HandleAnswerByID(w http.ResponseWriter, r *http.Request)
 	case http.MethodDelete:
 		h.deleteAnswer(w, r, id)
 	default:
-		w.WriteHeader(http.StatusMethodNotAllowed)
+		transport.WriteError(w, http.StatusMethodNotAllowed, "method not allowed")
 	}
 }
 
