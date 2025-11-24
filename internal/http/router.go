@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"question-service/internal/logger"
 	"question-service/internal/service"
 )
 
-func NewRouter(qSvc *service.QuestionService, aSvc *service.AnswerService) *http.ServeMux {
+func NewRouter(qSvc *service.QuestionService, aSvc *service.AnswerService, log *logger.Logger) *http.ServeMux {
 	mux := http.NewServeMux()
-
 	// healthcheck
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
@@ -23,7 +23,7 @@ func NewRouter(qSvc *service.QuestionService, aSvc *service.AnswerService) *http
 	})
 
 	qh := NewQuestionHandler(qSvc)
-	ah := NewAnswerHandler(aSvc)
+	ah := NewAnswerHandler(aSvc, log)
 
 	// /questions (GET, POST)
 	mux.HandleFunc("/questions", qh.HandleQuestions)

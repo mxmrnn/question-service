@@ -42,7 +42,7 @@ func run() error {
 	qSvc := service.NewQuestionService(qRepo)
 	aSvc := service.NewAnswerService(aRepo, qRepo)
 
-	router := httptransport.NewRouter(qSvc, aSvc)
+	router := httptransport.NewRouter(qSvc, aSvc, log)
 
 	application := app.NewApp(log, app.Config{
 		Address: cfg.HTTPPort,
