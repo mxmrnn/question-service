@@ -29,6 +29,8 @@ func (h *AnswerHandler) HandleCreateForQuestion(w http.ResponseWriter, r *http.R
 		return
 	}
 
+	defer r.Body.Close()
+
 	path := strings.TrimPrefix(r.URL.Path, "/questions/")
 	parts := strings.Split(path, "/")
 	if len(parts) != 2 || parts[1] != "answers" {
@@ -100,6 +102,10 @@ func (h *AnswerHandler) HandleAnswerByID(w http.ResponseWriter, r *http.Request)
 
 	id, err := strconv.Atoi(idStr)
 	if err != nil || id <= 0 {
+		h.log.Warn("invalid answer id",
+			zap.String("path", r.URL.Path),
+			zap.String("id_raw", idStr),
+		)
 		transport.WriteError(w, http.StatusBadRequest, "invalid answer id")
 		return
 	}
