@@ -3,6 +3,7 @@ package http
 import (
 	"encoding/json"
 	"net/http"
+	"question-service/internal/transport"
 
 	"question-service/internal/logger"
 	"question-service/internal/service"
@@ -22,7 +23,7 @@ func NewRouter(qSvc *service.QuestionService, aSvc *service.AnswerService, log *
 		_ = json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 	})
 
-	qh := NewQuestionHandler(qSvc)
+	qh := NewQuestionHandler(qSvc, log)
 	ah := NewAnswerHandler(aSvc, log)
 
 	// /questions (GET, POST)
